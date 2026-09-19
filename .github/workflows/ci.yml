@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # The base install must stay dependency-free, so prove the package and
+      # its CLI work before any optional extra is present.
+      - name: Install base package only
+        run: uv pip install --system -e .
+      - name: Verify base install has no LangChain
+        run: |
+          python -c "import testrot; print(testrot.__version__)"
+          testrot --list-rules
+          python - <<'PY'
+          try:
+              import langchain_core
+          except ImportError:
+              print("confirmed: base install pulls in no LangChain")
+          else:
+              raise SystemExit("base install must not depend on langchain-core")
+          PY
+      - name: testrot scans itself
+        run: testrot src/ tests/
+
+      - name: Install dev and langgraph extras
+        run: uv pip install --system -e ".[dev,langgraph]"
+      - name: Lint
+        run: ruff check .
+      - name: Type check
+        run: mypy src
+      - name: Test
+        run: pytest -q
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv pip install --system build twine
+      - run: python -m build
+      - name: Validate wheel metadata
+        run: twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
