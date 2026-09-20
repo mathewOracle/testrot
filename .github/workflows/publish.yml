@@ -27,9 +27,9 @@ jobs:
         with:
           python-version: "3.12"
       # uv's managed interpreter rejects --system, so build inside a venv.
-      - name: Create virtualenv
+      - name: Activate the uv-managed virtualenv
         run: |
-          uv venv .venv
+          uv venv .venv --allow-existing
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - run: uv pip install build twine
       - run: python -m build
