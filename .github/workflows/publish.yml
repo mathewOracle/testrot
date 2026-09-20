@@ -26,7 +26,12 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-      - run: uv pip install --system build twine
+      # uv's managed interpreter rejects --system, so build inside a venv.
+      - name: Create virtualenv
+        run: |
+          uv venv .venv
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - run: uv pip install build twine
       - run: python -m build
       - run: twine check --strict dist/*
       - uses: actions/upload-artifact@v4
