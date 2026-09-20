@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import textwrap
-import typing
 
 import pytest
 
@@ -107,6 +106,7 @@ def test_list_rules_tool():
 from langchain_core.language_models.fake_chat_models import (  # noqa: E402
     GenericFakeChatModel,
 )
+from pydantic import Field  # noqa: E402
 
 
 class _ToolBindingFakeModel(GenericFakeChatModel):
@@ -115,9 +115,14 @@ class _ToolBindingFakeModel(GenericFakeChatModel):
     The stock LangChain fakes raise ``NotImplementedError`` on ``bind_tools``,
     which is exactly the call an agent makes while compiling. Subclassing keeps
     it a genuine Runnable while letting the graph build offline.
+
+    ``bound_tools`` must be a real pydantic field (``Field(default_factory=...)``)
+    rather than a plain mutable class attribute: this class is itself a pydantic
+    model, and pydantic forbids assigning to a ``ClassVar``-annotated name on an
+    instance -- that annotation says "this belongs to the class, not you".
     """
 
-    bound_tools: typing.ClassVar[list] = []
+    bound_tools: list = Field(default_factory=list)
 
     def bind_tools(self, tools, **kwargs):
         self.bound_tools = list(tools)

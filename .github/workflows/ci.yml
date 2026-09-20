@@ -27,6 +27,7 @@ jobs:
         run: |
           uv venv .venv --allow-existing
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$PWD/.venv" >> "$GITHUB_ENV"
 
       # The base install must stay dependency-free, so prove the package and
       # its CLI work before any optional extra is present.
@@ -67,6 +68,7 @@ jobs:
         run: |
           uv venv .venv --allow-existing
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$PWD/.venv" >> "$GITHUB_ENV"
       - run: uv pip install build twine
       - run: python -m build
       - name: Validate distribution metadata
