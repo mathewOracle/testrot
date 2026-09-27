@@ -241,6 +241,79 @@ def test_tr006_ignores_properly_called_assertion():
     assert found == []
 
 
+# -- TR007 unreachable raises check -----------------------------------------
+
+
+def test_tr007_flags_check_inside_raises_block():
+    """Shape of the real langgraph test_tool_node_node_interrupt defect."""
+    found = findings_for(
+        """
+        def test_interrupt():
+            with pytest.raises(GraphBubbleUp) as exc_info:
+                node.invoke({})
+                assert exc_info.value == "foo"
+        """,
+        "TR007",
+    )
+    assert len(found) == 1
+    assert found[0].line == 5
+    assert found[0].severity == Severity.HIGH
+
+
+def test_tr007_flags_unittest_and_async_forms():
+    found = findings_for(
+        """
+        async def test_a(self):
+            async with self.assertRaises(ValueError) as cm:
+                await f()
+                self.assertIn("bad", str(cm.exception))
+        """,
+        "TR007",
+    )
+    assert len(found) == 1
+
+
+def test_tr007_ignores_check_after_the_block():
+    found = findings_for(
+        """
+        def test_ok():
+            with pytest.raises(ValueError) as exc_info:
+                f()
+            assert exc_info.value.args == ("x",)
+        """,
+        "TR007",
+    )
+    assert found == []
+
+
+def test_tr007_ignores_other_statements_in_the_block():
+    # Setup lines that don't touch the captured exception are fine.
+    found = findings_for(
+        """
+        def test_ok():
+            with pytest.raises(ValueError) as exc_info:
+                pending = f()
+                assert isawaitable(pending)
+                g(pending)
+        """,
+        "TR007",
+    )
+    assert found == []
+
+
+def test_tr007_ignores_unrelated_context_managers():
+    found = findings_for(
+        """
+        def test_ok():
+            with open(p) as fh:
+                data = fh.read()
+                assert fh.closed is False
+        """,
+        "TR007",
+    )
+    assert found == []
+
+
 # -- scanner plumbing --------------------------------------------------------
 
 

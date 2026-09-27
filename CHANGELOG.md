@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `TR007` unreachable-raises-check: an assertion on the captured exception
+  placed inside its own `pytest.raises` / `assertRaises` block, after the
+  statement that raises, so it is always skipped. Found a real instance in
+  langgraph's `test_tool_node_node_interrupt`, with zero other hits across
+  langgraph, litellm, instructor and llama-index-core.
+
 ## [0.1.0] - 2026-09-19
 
 Initial release.

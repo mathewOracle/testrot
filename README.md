@@ -83,6 +83,7 @@ Two tools are exposed: `scan_for_rotten_tests` and `list_testrot_rules`. Results
 | `TR004` | `duplicate-dict-key` | `{1: "a", 1: "b"}` — first value silently discarded |
 | `TR005` | `discarded-result` | A call's result overwritten before it is ever read |
 | `TR006` | `uncalled-mock-assertion` | `m.assert_called_once` without `()` — never executes |
+| `TR007` | `unreachable-raises-check` | `assert exc.value == ...` *inside* its own `pytest.raises` block — skipped when the raise happens |
 
 ## On false positives
 

@@ -14,6 +14,6 @@ def load_builtin_analyzers() -> None:
     global _LOADED
     if _LOADED:
         return
-    from testrot.analyzers import deadcode, shadowing, tautology  # noqa: F401
+    from testrot.analyzers import deadcode, raises, shadowing, tautology  # noqa: F401
 
     _LOADED = True
